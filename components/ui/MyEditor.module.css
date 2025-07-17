@@ -1,0 +1,6 @@
+.editorWrapper :global(.ql-editor) {
+  min-height: 320px;
+  max-height: 200px;
+  padding: 16px;
+  font-size: 1rem;
+}
