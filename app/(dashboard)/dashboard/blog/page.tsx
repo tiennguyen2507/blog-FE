@@ -10,9 +10,13 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import React, { useState } from "react";
-import MyEditor from "@/components/ui/MyEditor";
+import dynamic from "next/dynamic";
 import httpRequest from "@/lib/httpRequest";
 import QuillViewer from "@/components/ui/QuillViewer";
+
+const MyEditor = dynamic(() => import("@/components/ui/MyEditor"), {
+  ssr: false,
+});
 
 interface Post {
   _id: string;
