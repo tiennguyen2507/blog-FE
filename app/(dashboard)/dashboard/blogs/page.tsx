@@ -1,6 +1,6 @@
 "use client";
 import { useFetchData } from "@/lib/useFetchData";
-import { Loader, Trash, Pencil } from "lucide-react";
+import { Loader, Trash, Pencil, User } from "lucide-react";
 import {
   Dialog,
   DialogTrigger,
@@ -13,6 +13,7 @@ import React, { useState } from "react";
 import httpRequest from "@/lib/httpRequest";
 import QuillViewer from "@/components/ui/QuillViewer";
 import dynamic from "next/dynamic";
+import { Avatar } from "@/components/ui/avatar";
 
 const MyEditor = dynamic(() => import("@/components/ui/MyEditor"), {
   ssr: false,
@@ -26,6 +27,12 @@ interface Post {
   createdAt: string;
   updatedAt: string;
   __v: number;
+  createdBy?: {
+    _id: string;
+    firstName: string;
+    lastName: string;
+    avatar?: string;
+  };
 }
 
 interface PostListResponse {
@@ -45,7 +52,7 @@ export default function AuthPage() {
     loading,
     error,
     refetch,
-  } = useFetchData<PostListResponse>("https://blog-data.up.railway.app/posts", {
+  } = useFetchData<PostListResponse>("/posts", {
     params: { page: 1, limit: 10 },
   });
 
@@ -129,7 +136,7 @@ export default function AuthPage() {
           </div>
         )}
         {postList && postList.data && postList.data.length > 0 ? (
-          <ul className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {postList.data.map((post) => (
               <li
                 key={post._id}
@@ -137,6 +144,32 @@ export default function AuthPage() {
               >
                 <div className="font-bold text-base sm:text-lg mb-1 line-clamp-1 text-gray-900">
                   {post.title}
+                </div>
+                <div className="flex items-center gap-2 mb-2">
+                  {post.createdBy && (
+                    <Avatar>
+                      {post.createdBy.avatar ? (
+                        <img
+                          src={post.createdBy.avatar}
+                          alt={
+                            post.createdBy.firstName +
+                            " " +
+                            post.createdBy.lastName
+                          }
+                          className="w-7 h-7 rounded-full object-cover"
+                        />
+                      ) : (
+                        <User className="w-7 h-7 text-gray-400" />
+                      )}
+                    </Avatar>
+                  )}
+                  <span className="text-sm text-gray-700 font-medium">
+                    {post.createdBy
+                      ? `${post.createdBy.firstName || ""} ${
+                          post.createdBy.lastName || ""
+                        }`.trim()
+                      : ""}
+                  </span>
                 </div>
                 <QuillViewer
                   html={post.description}
