@@ -41,10 +41,7 @@ function useRegister() {
     setLoading(true);
     setError(null);
     try {
-      const response = await httpRequest.post(
-        "http://localhost:3000/auth/register",
-        data
-      );
+      const response = await httpRequest.post("/auth/register", data);
       setLoading(false);
       return response.data;
     } catch (err: unknown) {

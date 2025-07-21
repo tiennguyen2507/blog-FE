@@ -47,10 +47,7 @@ function useLogin() {
     setLoading(true);
     setError(null);
     try {
-      const response = await httpRequest.post(
-        "http://localhost:3000/auth/login",
-        data
-      );
+      const response = await httpRequest.post("/auth/login", data);
       setLoading(false);
       return response.data;
     } catch (err: unknown) {
