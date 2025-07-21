@@ -10,9 +10,9 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import React, { useState } from "react";
-import dynamic from "next/dynamic";
 import httpRequest from "@/lib/httpRequest";
 import QuillViewer from "@/components/ui/QuillViewer";
+import dynamic from "next/dynamic";
 
 const MyEditor = dynamic(() => import("@/components/ui/MyEditor"), {
   ssr: false,
@@ -68,6 +68,13 @@ export default function AuthPage() {
 
   return (
     <div className="space-y-4 p-2">
+      <div className="text-center mb-4">
+        <h1 className="text-2xl md:text-3xl font-bold mb-1">Blog List pages</h1>
+        <p className="text-muted-foreground text-sm md:text-base">
+          Here are the authentication-related pages. These now live in their own
+          full-screen layout.
+        </p>
+      </div>
       <Dialog
         open={dialogOpen}
         onOpenChange={(open) => {
@@ -76,11 +83,13 @@ export default function AuthPage() {
         }}
       >
         <DialogTrigger asChild>
-          <Button variant="default" className="w-full md:w-auto mb-4">
-            Tạo bài viết
-          </Button>
+          <div className="flex justify-end">
+            <Button variant="default" className="md:w-auto w-full">
+              Tạo bài viết
+            </Button>
+          </div>
         </DialogTrigger>
-        <DialogContent className="w-full max-w-full sm:max-w-2xl rounded-lg p-2 sm:p-6">
+        <DialogContent className="rounded-lg p-6 h-[calc(100vh-50px)]">
           <DialogHeader>
             <DialogTitle>
               {editingPost ? "Cập nhật bài viết" : "Tạo bài viết mới"}
@@ -100,13 +109,6 @@ export default function AuthPage() {
           />
         </DialogContent>
       </Dialog>
-      <div className="text-center mb-4">
-        <h1 className="text-2xl md:text-3xl font-bold mb-1">Blog List pages</h1>
-        <p className="text-muted-foreground text-sm md:text-base">
-          Here are the authentication-related pages. These now live in their own
-          full-screen layout.
-        </p>
-      </div>
       <div className="mb-6">
         <div className="flex items-center justify-between mb-2">
           <h2 className="text-lg md:text-xl font-semibold">Posts</h2>
@@ -127,7 +129,7 @@ export default function AuthPage() {
           </div>
         )}
         {postList && postList.data && postList.data.length > 0 ? (
-          <ul className="space-y-4">
+          <ul className="grid grid-cols-1 md:grid-cols-4 gap-4">
             {postList.data.map((post) => (
               <li
                 key={post._id}
@@ -140,41 +142,42 @@ export default function AuthPage() {
                   html={post.description}
                   className="text-sm text-muted-foreground mb-2 line-clamp-3"
                 />
-                <div className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-1 sm:gap-2 text-xs text-gray-500 mt-auto">
-                  <span>
-                    Status:{" "}
-                    <span
-                      className={
-                        post.status ? "text-green-600" : "text-red-600"
-                      }
-                    >
-                      {post.status ? "Active" : "Inactive"}
+                <div className="flex flex-row justify-between">
+                  <div className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-1 sm:gap-2 text-xs text-gray-500 mt-auto">
+                    <span>
+                      Status:{" "}
+                      <span
+                        className={
+                          post.status ? "text-green-600" : "text-red-600"
+                        }
+                      >
+                        {post.status ? "Active" : "Inactive"}
+                      </span>
                     </span>
-                  </span>
-                  <span>•</span>
-                  <span>
-                    Created: {new Date(post.createdAt).toLocaleString("vi-VN")}
-                  </span>
-                </div>
-                {/* Action buttons at the bottom right */}
-                <div className="flex justify-end gap-2 mt-3">
-                  <button
-                    className="p-2 rounded-full bg-white shadow hover:bg-red-100 active:bg-red-200"
-                    title="Xoá bài viết"
-                    onClick={() => handleDelete(post._id)}
-                  >
-                    <Trash size={20} />
-                  </button>
-                  <button
-                    className="p-2 rounded-full bg-white shadow hover:bg-blue-100 active:bg-blue-200"
-                    title="Sửa bài viết"
-                    onClick={() => {
-                      setEditingPost(post);
-                      setDialogOpen(true);
-                    }}
-                  >
-                    <Pencil size={20} />
-                  </button>
+                    <span>
+                      Created:{" "}
+                      {new Date(post.createdAt).toLocaleString("vi-VN")}
+                    </span>
+                  </div>
+                  <div className="flex flex-row gap-2">
+                    <button
+                      className="p-2 rounded-full bg-white shadow hover:bg-red-100 active:bg-red-200"
+                      title="Xoá bài viết"
+                      onClick={() => handleDelete(post._id)}
+                    >
+                      <Trash size={20} />
+                    </button>
+                    <button
+                      className="p-2 rounded-full bg-white shadow hover:bg-blue-100 active:bg-blue-200"
+                      title="Sửa bài viết"
+                      onClick={() => {
+                        setEditingPost(post);
+                        setDialogOpen(true);
+                      }}
+                    >
+                      <Pencil size={20} />
+                    </button>
+                  </div>
                 </div>
               </li>
             ))}
@@ -232,7 +235,7 @@ function PostForm({
   };
 
   return (
-    <form className="space-y-4 " onSubmit={handleSubmit}>
+    <form className="space-y-4" onSubmit={handleSubmit}>
       <div>
         <label className="block mb-1 font-medium">Tiêu đề</label>
         <input

@@ -1,11 +1,12 @@
-"use client"
+"use client";
 
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import { z } from "zod"
-import { toast } from "sonner"
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { toast } from "sonner";
+import React from "react";
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -13,8 +14,8 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import {
   Card,
   CardContent,
@@ -22,9 +23,11 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import { LogIn, Mail, Lock } from "lucide-react"
-import Link from "next/link"
+} from "@/components/ui/card";
+import { LogIn, Mail, Lock } from "lucide-react";
+import Link from "next/link";
+import httpRequest from "@/lib/httpRequest";
+import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
   email: z.string().email({
@@ -33,7 +36,46 @@ const formSchema = z.object({
   password: z.string().min(6, {
     message: "Password must be at least 6 characters.",
   }),
-})
+});
+
+// Custom hook để đăng nhập
+function useLogin() {
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
+
+  const login = async (data: { email: string; password: string }) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await httpRequest.post(
+        "http://localhost:3000/auth/login",
+        data
+      );
+      setLoading(false);
+      return response.data;
+    } catch (err: unknown) {
+      if (typeof err === "object" && err !== null && "response" in err) {
+        const errorObj = err as {
+          response?: { data?: { message?: string } };
+          message?: string;
+        };
+        setError(
+          errorObj.response?.data?.message ||
+            errorObj.message ||
+            "Đăng nhập thất bại"
+        );
+      } else if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Đăng nhập thất bại");
+      }
+      setLoading(false);
+      throw err;
+    }
+  };
+
+  return { login, loading, error };
+}
 
 export default function LoginPage() {
   const form = useForm<z.infer<typeof formSchema>>({
@@ -42,13 +84,42 @@ export default function LoginPage() {
       email: "",
       password: "",
     },
-  })
+  });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values)
-    toast.success("Login successful!", {
-      description: "Welcome back! You have been logged in successfully.",
-    })
+  const { login: loginUser, loading, error } = useLogin();
+  const router = useRouter();
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      const result = await loginUser(values);
+      if (result && result.access_token && result.refresh_token) {
+        localStorage.setItem("access_token", result.access_token);
+        localStorage.setItem("refresh_token", result.refresh_token);
+      }
+      toast.success("Login successful!", {
+        description: "Welcome back! You have been logged in successfully.",
+      });
+      router.push("/dashboard");
+    } catch (err: unknown) {
+      let msg: string | null = error;
+      if (
+        !msg &&
+        typeof err === "object" &&
+        err !== null &&
+        "response" in err
+      ) {
+        const errorObj = err as {
+          response?: { data?: { message?: string } };
+          message?: string;
+        };
+        msg = errorObj.response?.data?.message || errorObj.message || null;
+      } else if (!msg && err instanceof Error) {
+        msg = err.message || null;
+      }
+      toast.error("Đăng nhập thất bại", {
+        description: msg,
+      });
+    }
   }
 
   return (
@@ -104,8 +175,8 @@ export default function LoginPage() {
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full">
-              Sign In
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? "Đang đăng nhập..." : "Sign In"}
             </Button>
           </form>
         </Form>
@@ -129,6 +200,9 @@ export default function LoginPage() {
           </Link>
         </div>
       </CardFooter>
+      {error && (
+        <div className="text-red-500 text-center text-sm mt-2">{error}</div>
+      )}
     </Card>
-  )
-} 
+  );
+}
