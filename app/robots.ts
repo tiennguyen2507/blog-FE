@@ -1,18 +1,18 @@
-import { MetadataRoute } from 'next'
+import { MetadataRoute } from "next";
 
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
-      userAgent: '*',
-      allow: '/',
+      userAgent: "*",
+      allow: "/",
       disallow: [
-        '/dashboard/settings/',
-        '/dashboard/errors/',
-        '/api/',
-        '/_next/',
-        '/admin/',
+        "/dashboard/settings/",
+        "/dashboard/errors/",
+        "/api/",
+        "/_next/",
+        "/admin/",
       ],
     },
-    sitemap: 'https://shadcn-nextjs-dashboard.vercel.app/sitemap.xml',
-  }
-} 
+    sitemap: "https://blog-fe-nld.vercel.app/sitemap.xml",
+  };
+}

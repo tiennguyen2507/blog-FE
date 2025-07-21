@@ -1,18 +1,4 @@
-# Modern Next.js Dashboard with shadcn/ui
-
-A modern, responsive dashboard application built with Next.js 14, TypeScript, and shadcn/ui components. This project implements best practices for building scalable web applications with a beautiful UI/UX.
-
-![Dashboard](https://shadcn-nextjs-dashboard.vercel.app/og-image.png)
-
 ## 🚀 Features
-
-- **Modern Tech Stack**: Built with Next.js 14, TypeScript, and Tailwind CSS
-- **Beautiful UI Components**: Utilizes shadcn/ui for consistent and customizable components
-- **Authentication Ready**: Prepared authentication routes and components
-- **Dashboard Layout**: Professional dashboard layout with sidebar navigation
-- **Responsive Design**: Mobile-first approach ensuring great UX across all devices
-- **Type Safety**: Full TypeScript support for better development experience
-- **Performance Optimized**: Built with performance best practices
 
 ## 📦 Prerequisites
 
@@ -22,12 +8,14 @@ A modern, responsive dashboard application built with Next.js 14, TypeScript, an
 ## 🛠️ Installation
 
 1. Clone the repository:
+
    ```bash
    git clone https://github.com/naveenda/shacn-nextjs-dashboard.git
    cd shacn-nextjs-dashboard
    ```
 
 2. Install dependencies:
+
    ```bash
    npm install
    # or
@@ -35,6 +23,7 @@ A modern, responsive dashboard application built with Next.js 14, TypeScript, an
    ```
 
 3. Run the development server:
+
    ```bash
    npm run dev
    # or
@@ -63,6 +52,7 @@ A modern, responsive dashboard application built with Next.js 14, TypeScript, an
 ## 🎨 Customization
 
 This project uses shadcn/ui components which are fully customizable. You can modify the theme in:
+
 - `app/globals.css` - For global styles
 - `components.json` - For component configurations
 
@@ -81,5 +71,3 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-# blog-FE
-# blog-FE
