@@ -26,18 +26,15 @@ import {
 import Link from "next/link";
 import httpRequest from "@/lib/httpRequest";
 import { useRouter } from "next/navigation";
+import UploadFile from "@/components/ui/UploadFile";
 
 // Custom hook để đăng ký
+type RegisterData = z.infer<typeof formSchema>;
 function useRegister() {
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
 
-  const register = async (data: {
-    firstName: string;
-    lastName: string;
-    email: string;
-    password: string;
-  }) => {
+  const register = async (data: RegisterData) => {
     setLoading(true);
     setError(null);
     try {
@@ -79,10 +76,17 @@ const formSchema = z.object({
   password: z
     .string()
     .min(8, { message: "Password must be at least 8 characters." }),
+  avatar: z.string().optional(),
 });
 
 export default function RegisterPage() {
   const router = useRouter();
+  const [avatarFile, setAvatarFile] = React.useState<File | undefined>(
+    undefined
+  );
+  const [avatarUrl, setAvatarUrl] = React.useState<string | undefined>(
+    undefined
+  );
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -95,9 +99,20 @@ export default function RegisterPage() {
 
   const { register: registerUser, loading, error } = useRegister();
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: RegisterData) {
     try {
-      const result = await registerUser(values);
+      let avatar = avatarUrl;
+      if (avatarFile) {
+        const formData = new FormData();
+        formData.append("file", avatarFile);
+        formData.append("folder", "avatar");
+        const res = await httpRequest.post("/image/upload", formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+        avatar = res.data?.secure_url || res.data?.url;
+        setAvatarUrl(avatar);
+      }
+      const result = await registerUser({ ...values, avatar });
       if (result && result.access_token && result.refresh_token) {
         localStorage.setItem("access_token", result.access_token);
         localStorage.setItem("refresh_token", result.refresh_token);
@@ -167,6 +182,7 @@ export default function RegisterPage() {
                 )}
               />
             </div>
+            <UploadFile onChange={setAvatarFile} />
             <FormField
               control={form.control}
               name="email"
