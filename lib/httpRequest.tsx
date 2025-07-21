@@ -9,4 +9,19 @@ const httpRequest = axios.create({
   },
 });
 
+// Thêm interceptor để tự động set Authorization header với access_token từ localStorage
+httpRequest.interceptors.request.use(
+  (config) => {
+    if (typeof window !== "undefined") {
+      const token = localStorage.getItem("access_token");
+      if (token) {
+        config.headers = config.headers || {};
+        config.headers["Authorization"] = `Bearer ${token}`;
+      }
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
 export default httpRequest;

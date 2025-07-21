@@ -34,7 +34,7 @@ const sidebarGroups = [
       },
       {
         title: "Blog Pages",
-        href: "/dashboard/blog",
+        href: "/dashboard/blogs",
         icon: Loader,
       },
       {
