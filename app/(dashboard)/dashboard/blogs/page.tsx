@@ -1,6 +1,14 @@
 "use client";
 import { useFetchData } from "@/lib/useFetchData";
-import { Loader, Trash, Pencil, User } from "lucide-react";
+import {
+  Loader,
+  Trash,
+  Pencil,
+  User,
+  Plus,
+  CheckCircle2,
+  XCircle,
+} from "lucide-react";
 import {
   Dialog,
   DialogTrigger,
@@ -90,30 +98,42 @@ export default function AuthPage() {
         }}
       >
         <DialogTrigger asChild>
-          <div className="flex justify-end">
-            <Button variant="default" className="md:w-auto w-full">
+          <div className="flex justify-end mb-4">
+            <Button
+              variant="default"
+              className="md:w-auto w-full flex items-center gap-2 font-semibold shadow-lg"
+              size="lg"
+            >
+              <Plus className="w-5 h-5" />
               Tạo bài viết
             </Button>
           </div>
         </DialogTrigger>
-        <DialogContent className="rounded-lg p-6 h-[calc(100vh-50px)]">
-          <DialogHeader>
-            <DialogTitle>
-              {editingPost ? "Cập nhật bài viết" : "Tạo bài viết mới"}
-            </DialogTitle>
-          </DialogHeader>
-          <PostForm
-            post={editingPost || undefined}
-            onSuccess={() => {
-              setDialogOpen(false);
-              setEditingPost(null);
-              refetch();
-            }}
-            onCancel={() => {
-              setDialogOpen(false);
-              setEditingPost(null);
-            }}
-          />
+        <DialogContent className="rounded-2xl p-0 max-w-2xl w-full shadow-2xl animate-fadeIn">
+          <div className="p-6">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-bold mb-1">
+                {editingPost ? "Cập nhật bài viết" : "Tạo bài viết mới"}
+              </DialogTitle>
+              <p className="text-muted-foreground text-sm mb-4">
+                {editingPost
+                  ? "Chỉnh sửa nội dung và tiêu đề bài viết."
+                  : "Điền thông tin để tạo bài viết mới."}
+              </p>
+            </DialogHeader>
+            <PostForm
+              post={editingPost || undefined}
+              onSuccess={() => {
+                setDialogOpen(false);
+                setEditingPost(null);
+                refetch();
+              }}
+              onCancel={() => {
+                setDialogOpen(false);
+                setEditingPost(null);
+              }}
+            />
+          </div>
         </DialogContent>
       </Dialog>
       <div className="mb-6">
@@ -173,7 +193,7 @@ export default function AuthPage() {
                 </div>
                 <QuillViewer
                   html={post.description}
-                  className="text-sm text-muted-foreground mb-2 line-clamp-3"
+                  className="text-sm text-muted-foreground mb-2 line-clamp-3 max-h-[60px] overflow-hidden"
                 />
                 <div className="flex flex-row justify-between">
                   <div className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-1 sm:gap-2 text-xs text-gray-500 mt-auto">
@@ -240,18 +260,22 @@ function PostForm({
   const [description, setDescription] = useState(post?.description || "");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [isSuccess, setIsSuccess] = useState<boolean | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setMessage(null);
+    setIsSuccess(null);
     try {
       if (post) {
         await httpRequest.patch(`/posts/${post._id}`, { title, description });
         setMessage("Cập nhật bài viết thành công!");
+        setIsSuccess(true);
       } else {
         await httpRequest.post("/posts", { title, description });
         setMessage("Tạo bài viết thành công!");
+        setIsSuccess(true);
         setTitle("");
         setDescription("");
       }
@@ -262,40 +286,57 @@ function PostForm({
         msg += ` ${(err as { message?: string }).message}`;
       }
       setMessage(msg);
+      setIsSuccess(false);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <form className="space-y-4" onSubmit={handleSubmit}>
+    <form className="space-y-5" onSubmit={handleSubmit}>
       <div>
-        <label className="block mb-1 font-medium">Tiêu đề</label>
-        <input
-          className="border rounded w-full py-2 px-3 text-base"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          disabled={loading}
-        />
+        <label className="block mb-1 font-semibold text-base">Tiêu đề</label>
+        <div className="relative">
+          <input
+            className="border rounded-lg w-full py-2 px-3 text-base focus:outline-none focus:ring-2 focus:ring-primary/60 focus:border-primary transition disabled:bg-gray-100 placeholder:text-gray-400"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            disabled={loading}
+            placeholder="Nhập tiêu đề bài viết..."
+            maxLength={120}
+          />
+        </div>
       </div>
       <div>
-        <label className="block mb-1 font-medium">Mô tả</label>
-        <MyEditor value={description} onChange={setDescription} />
+        <label className="block mb-1 font-semibold text-base">Mô tả</label>
+        <div className="rounded-lg border focus-within:ring-2 focus-within:ring-primary/60 focus-within:border-primary transition">
+          <MyEditor value={description} onChange={setDescription} />
+        </div>
       </div>
-      <div className="flex gap-2 justify-end">
+      <div className="flex flex-col sm:flex-row gap-2 justify-end mt-4">
         <button
           type="button"
-          className="bg-gray-200 text-gray-800 px-4 py-2 rounded"
+          className="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-gray-300 transition font-medium"
           onClick={onCancel}
           disabled={loading}
         >
+          <XCircle className="w-5 h-5" />
           Huỷ
         </button>
         <button
           type="submit"
-          className="bg-primary text-white px-4 py-2 rounded disabled:opacity-50"
+          className="bg-primary text-white px-4 py-2 rounded-lg flex items-center gap-2 disabled:opacity-50 font-semibold shadow hover:bg-primary/90 transition"
           disabled={loading || !title.trim() || !description.trim()}
         >
+          {loading ? (
+            <Loader className="animate-spin w-5 h-5" />
+          ) : isSuccess ? (
+            <CheckCircle2 className="w-5 h-5" />
+          ) : post ? (
+            <Pencil className="w-5 h-5" />
+          ) : (
+            <Plus className="w-5 h-5" />
+          )}
           {loading
             ? post
               ? "Đang cập nhật..."
@@ -305,7 +346,24 @@ function PostForm({
             : "Tạo bài viết"}
         </button>
       </div>
-      {message && <div className="text-center text-sm mt-2">{message}</div>}
+      {message && (
+        <div
+          className={`flex items-center gap-2 justify-center text-sm mt-2 font-medium ${
+            isSuccess === true
+              ? "text-green-600"
+              : isSuccess === false
+              ? "text-red-600"
+              : "text-gray-700"
+          }`}
+        >
+          {isSuccess === true ? (
+            <CheckCircle2 className="w-5 h-5" />
+          ) : isSuccess === false ? (
+            <XCircle className="w-5 h-5" />
+          ) : null}
+          {message}
+        </div>
+      )}
     </form>
   );
 }
