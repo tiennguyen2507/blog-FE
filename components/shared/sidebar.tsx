@@ -4,108 +4,120 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
-  LayoutDashboard,
-  Settings,
-  Users,
-  BarChart3,
-  FolderKanban,
+  // LayoutDashboard,
+  // Settings,
+  // Users,
+  // BarChart3,
+  // FolderKanban,
   ChevronLeft,
   ChevronRight,
-  FileText,
-  Calendar,
-  Database,
-  MessageSquare,
-  Shield,
-  HelpCircle,
-  LogIn,
-  AlertCircle,
+  // FileText,
+  // Calendar,
+  // Database,
+  // MessageSquare,
+  // Shield,
+  // HelpCircle,
+  // LogIn,
+  // AlertCircle,
   Loader,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-const sidebarGroups = [
+// const sidebarGroups = [
+//   {
+//     title: "General",
+//     items: [
+//       {
+//         title: "Dashboard",
+//         href: "/dashboard",
+//         icon: LayoutDashboard,
+//       },
+//       {
+//         title: "Blog Pages",
+//         href: "/dashboard/blogs",
+//         icon: Loader,
+//       },
+//       {
+//         title: "Analytics",
+//         href: "/dashboard/analytics",
+//         icon: BarChart3,
+//       },
+//       {
+//         title: "Settings",
+//         href: "/dashboard/settings",
+//         icon: Settings,
+//       },
+//     ],
+//   },
+//   {
+//     title: "Pages",
+//     items: [
+//       {
+//         title: "Users",
+//         href: "/dashboard/users",
+//         icon: Users,
+//       },
+//       {
+//         title: "Projects",
+//         href: "/dashboard/projects",
+//         icon: FolderKanban,
+//       },
+//       {
+//         title: "Documents",
+//         href: "/dashboard/documents",
+//         icon: FileText,
+//       },
+//       {
+//         title: "Calendar",
+//         href: "/dashboard/calendar",
+//         icon: Calendar,
+//       },
+//       {
+//         title: "Auth Pages",
+//         href: "/dashboard/auth",
+//         icon: LogIn,
+//       },
+//       {
+//         title: "Error Pages",
+//         href: "/dashboard/errors",
+//         icon: AlertCircle,
+//       },
+//     ],
+//   },
+//   {
+//     title: "Others",
+//     items: [
+//       {
+//         title: "Messages",
+//         href: "/dashboard/messages",
+//         icon: MessageSquare,
+//       },
+//       {
+//         title: "Database",
+//         href: "/dashboard/database",
+//         icon: Database,
+//       },
+//       {
+//         title: "Security",
+//         href: "/dashboard/security",
+//         icon: Shield,
+//       },
+//       {
+//         title: "Help",
+//         href: "/dashboard/help",
+//         icon: HelpCircle,
+//       },
+//     ],
+//   },
+// ];
+const sidebarGroups1 = [
   {
     title: "General",
     items: [
       {
-        title: "Dashboard",
-        href: "/dashboard",
-        icon: LayoutDashboard,
-      },
-      {
         title: "Blog Pages",
         href: "/dashboard/blogs",
         icon: Loader,
-      },
-      {
-        title: "Analytics",
-        href: "/dashboard/analytics",
-        icon: BarChart3,
-      },
-      {
-        title: "Settings",
-        href: "/dashboard/settings",
-        icon: Settings,
-      },
-    ],
-  },
-  {
-    title: "Pages",
-    items: [
-      {
-        title: "Users",
-        href: "/dashboard/users",
-        icon: Users,
-      },
-      {
-        title: "Projects",
-        href: "/dashboard/projects",
-        icon: FolderKanban,
-      },
-      {
-        title: "Documents",
-        href: "/dashboard/documents",
-        icon: FileText,
-      },
-      {
-        title: "Calendar",
-        href: "/dashboard/calendar",
-        icon: Calendar,
-      },
-      {
-        title: "Auth Pages",
-        href: "/dashboard/auth",
-        icon: LogIn,
-      },
-      {
-        title: "Error Pages",
-        href: "/dashboard/errors",
-        icon: AlertCircle,
-      },
-    ],
-  },
-  {
-    title: "Others",
-    items: [
-      {
-        title: "Messages",
-        href: "/dashboard/messages",
-        icon: MessageSquare,
-      },
-      {
-        title: "Database",
-        href: "/dashboard/database",
-        icon: Database,
-      },
-      {
-        title: "Security",
-        href: "/dashboard/security",
-        icon: Shield,
-      },
-      {
-        title: "Help",
-        href: "/dashboard/help",
-        icon: HelpCircle,
       },
     ],
   },
@@ -145,7 +157,7 @@ export function Sidebar() {
 
       {/* Navigation Groups */}
       <nav className="flex-1 space-y-6 p-4">
-        {sidebarGroups.map((group) => (
+        {sidebarGroups1.map((group) => (
           <div key={group.title} className="space-y-2">
             {/* Group Title */}
             {!isCollapsed && (
