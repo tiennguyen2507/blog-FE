@@ -168,7 +168,7 @@ export default function BlogsPage() {
           </div>
         )}
         {postList && postList.data && postList.data.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {postList.data.map((post) => (
               <article
                 key={post._id}
@@ -179,7 +179,7 @@ export default function BlogsPage() {
                   <div className="cursor-pointer">
                     {/* Thumbnail */}
                     {post.thumbnail ? (
-                      <div className="relative md:h-48 h-32 overflow-hidden">
+                      <div className="relative  h-32 overflow-hidden">
                         <Image
                           src={post.thumbnail}
                           alt={post.title}
