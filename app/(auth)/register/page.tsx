@@ -27,19 +27,17 @@ import Link from "next/link";
 import httpRequest from "@/lib/httpRequest";
 import { useRouter } from "next/navigation";
 import UploadFile from "@/components/ui/UploadFile";
+import { Loader } from "lucide-react";
 
 // Custom hook để đăng ký
 type RegisterData = z.infer<typeof formSchema>;
 function useRegister() {
-  const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
 
   const register = async (data: RegisterData) => {
-    setLoading(true);
     setError(null);
     try {
       const response = await httpRequest.post("/auth/register", data);
-      setLoading(false);
       return response.data;
     } catch (err: unknown) {
       if (typeof err === "object" && err !== null && "response" in err) {
@@ -57,12 +55,11 @@ function useRegister() {
       } else {
         setError("Đăng ký thất bại");
       }
-      setLoading(false);
       throw err;
     }
   };
 
-  return { register, loading, error };
+  return { register, error };
 }
 
 const formSchema = z.object({
@@ -87,6 +84,7 @@ export default function RegisterPage() {
   const [avatarUrl, setAvatarUrl] = React.useState<string | undefined>(
     undefined
   );
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -97,9 +95,10 @@ export default function RegisterPage() {
     },
   });
 
-  const { register: registerUser, loading, error } = useRegister();
+  const { register: registerUser, error } = useRegister();
 
   async function onSubmit(values: RegisterData) {
+    setIsSubmitting(true);
     try {
       let avatar = avatarUrl;
       if (avatarFile) {
@@ -140,6 +139,8 @@ export default function RegisterPage() {
       toast.error("Đăng ký thất bại", {
         description: msg,
       });
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -162,7 +163,7 @@ export default function RegisterPage() {
                   <FormItem>
                     <FormLabel>First Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="Max" {...field} />
+                      <Input placeholder="admin" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -175,7 +176,7 @@ export default function RegisterPage() {
                   <FormItem>
                     <FormLabel>Last Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="Robinson" {...field} />
+                      <Input placeholder="admin" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -190,7 +191,7 @@ export default function RegisterPage() {
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input placeholder="m@example.com" {...field} />
+                    <Input placeholder="m@gmail.com" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -209,8 +210,15 @@ export default function RegisterPage() {
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Đang đăng ký..." : "Create an account"}
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
+              {isSubmitting ? (
+                <>
+                  <Loader className="mr-2 h-4 w-4 animate-spin" />
+                  Đang đăng ký...
+                </>
+              ) : (
+                "Create an account"
+              )}
             </Button>
           </form>
         </Form>
