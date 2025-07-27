@@ -11,7 +11,6 @@ import {
 } from "lucide-react";
 import {
   Dialog,
-  DialogTrigger,
   DialogContent,
   DialogTitle,
   DialogHeader,
@@ -25,6 +24,7 @@ import UploadFile from "@/components/ui/UploadFile";
 import Link from "next/link";
 import Image from "next/image";
 import ClientHtmlViewer from "@/components/ui/ClientHtmlViewer";
+import { useInfoUser } from "@/lib/useInfoUser";
 
 const MyEditor = dynamic(() => import("@/components/ui/MyEditor"), {
   ssr: false,
@@ -59,6 +59,8 @@ interface PostListResponse {
 export default function BlogsPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingPost, setEditingPost] = useState<Post | null>(null);
+
+  const { middleWareLogin } = useInfoUser();
   const {
     data: postList,
     loading,
@@ -75,16 +77,27 @@ export default function BlogsPage() {
     else errorMessage = "Error loading posts.";
   }
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Bạn có chắc chắn muốn xoá bài viết này?")) return;
-    try {
-      await httpRequest.delete(`/posts/${id}`);
-      refetch();
-    } catch {
-      alert("Xoá bài viết thất bại!");
-    }
-  };
+  const handleDelete = async (id: string) =>
+    middleWareLogin(async () => {
+      if (!confirm("Bạn có chắc chắn muốn xoá bài viết này?")) return;
+      try {
+        await httpRequest.delete(`/posts/${id}`);
+        refetch();
+      } catch {
+        alert("Xoá bài viết thất bại!");
+      }
+    });
 
+  const handleCreatePost = () =>
+    middleWareLogin(() => {
+      setDialogOpen(true);
+    });
+
+  const handleEditPost = (post: Post) =>
+    middleWareLogin(() => {
+      setEditingPost(post);
+      setDialogOpen(true);
+    });
   return (
     <div className="space-y-4">
       <div className="text-center mb-4">
@@ -101,18 +114,17 @@ export default function BlogsPage() {
           setDialogOpen(open);
         }}
       >
-        <DialogTrigger asChild>
-          <div className="flex justify-end mb-4">
-            <Button
-              variant="default"
-              className="md:w-auto w-full flex items-center gap-2 font-semibold shadow-lg"
-              size="lg"
-            >
-              <Plus className="w-5 h-5" />
-              Tạo bài viết
-            </Button>
-          </div>
-        </DialogTrigger>
+        <div className="flex justify-end mb-4">
+          <Button
+            variant="default"
+            className="md:w-auto w-full flex items-center gap-2 font-semibold shadow-lg"
+            size="lg"
+            onClick={handleCreatePost}
+          >
+            <Plus className="w-5 h-5" />
+            Tạo bài viết
+          </Button>
+        </div>
         <DialogContent
           className="rounded-2xl p-0 max-w-2xl w-full max-h-[90vh] shadow-2xl animate-fadeIn flex flex-col"
           style={{ maxHeight: "90vh" }}
@@ -268,8 +280,7 @@ export default function BlogsPage() {
                               onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
-                                setEditingPost(post);
-                                setDialogOpen(true);
+                                handleEditPost(post);
                               }}
                             >
                               <Pencil size={16} />
@@ -304,6 +315,7 @@ function PostForm({
   onSuccess?: () => void;
   onCancel?: () => void;
 }) {
+  const { middleWareLogin } = useInfoUser();
   const [title, setTitle] = useState(post?.title || "");
   const [description, setDescription] = useState(post?.description || "");
   const [thumbnailFile, setThumbnailFile] = useState<File | undefined>(
@@ -318,50 +330,55 @@ function PostForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setMessage(null);
-    setIsSuccess(null);
-    try {
-      let thumbnail = thumbnailUrl;
-      if (thumbnailFile) {
-        const formData = new FormData();
-        formData.append("file", thumbnailFile);
-        formData.append("folder", "thumbnails");
-        const res = await httpRequest.post("/image/upload", formData, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
-        thumbnail = res.data?.secure_url || res.data?.url;
-        setThumbnailUrl(thumbnail);
-      }
 
-      if (post) {
-        await httpRequest.patch(`/posts/${post._id}`, {
-          title,
-          description,
-          thumbnail,
-        });
-        setMessage("Cập nhật bài viết thành công!");
-        setIsSuccess(true);
-      } else {
-        await httpRequest.post("/posts", { title, description, thumbnail });
-        setMessage("Tạo bài viết thành công!");
-        setIsSuccess(true);
-        setTitle("");
-        setDescription("");
-        setThumbnailUrl(undefined);
-        setThumbnailFile(undefined);
+    middleWareLogin(async () => {
+      setLoading(true);
+      setMessage(null);
+      setIsSuccess(null);
+      try {
+        let thumbnail = thumbnailUrl;
+        if (thumbnailFile) {
+          const formData = new FormData();
+          formData.append("file", thumbnailFile);
+          formData.append("folder", "thumbnails");
+          const res = await httpRequest.post("/image/upload", formData, {
+            headers: { "Content-Type": "multipart/form-data" },
+          });
+          thumbnail = res.data?.secure_url || res.data?.url;
+          setThumbnailUrl(thumbnail);
+        }
+
+        if (post) {
+          await httpRequest.patch(`/posts/${post._id}`, {
+            title,
+            description,
+            thumbnail,
+          });
+          setMessage("Cập nhật bài viết thành công!");
+          setIsSuccess(true);
+        } else {
+          await httpRequest.post("/posts", { title, description, thumbnail });
+          setMessage("Tạo bài viết thành công!");
+          setIsSuccess(true);
+          setTitle("");
+          setDescription("");
+          setThumbnailUrl(undefined);
+          setThumbnailFile(undefined);
+        }
+        if (onSuccess) onSuccess();
+      } catch (err: unknown) {
+        let msg = post
+          ? "Cập nhật bài viết thất bại!"
+          : "Tạo bài viết thất bại!";
+        if (err && typeof err === "object" && "message" in err) {
+          msg += ` ${(err as { message?: string }).message}`;
+        }
+        setMessage(msg);
+        setIsSuccess(false);
+      } finally {
+        setLoading(false);
       }
-      if (onSuccess) onSuccess();
-    } catch (err: unknown) {
-      let msg = post ? "Cập nhật bài viết thất bại!" : "Tạo bài viết thất bại!";
-      if (err && typeof err === "object" && "message" in err) {
-        msg += ` ${(err as { message?: string }).message}`;
-      }
-      setMessage(msg);
-      setIsSuccess(false);
-    } finally {
-      setLoading(false);
-    }
+    });
   };
 
   return (
