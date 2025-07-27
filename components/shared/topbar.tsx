@@ -81,7 +81,7 @@ export function Topbar() {
               </Avatar>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
+          <DropdownMenuContent align="end" className="w-[200px]">
             <div className="flex flex-col items-center gap-1 p-2">
               <Avatar className="h-12 w-12">
                 {user?.avatar ? (
@@ -101,6 +101,7 @@ export function Topbar() {
             </div>
             <DropdownMenuSeparator />
             <DropdownMenuItem>Profile</DropdownMenuItem>
+            <DropdownMenuSeparator />
             <DropdownMenuItem>Settings</DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem

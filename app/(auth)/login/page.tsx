@@ -96,7 +96,7 @@ export default function LoginPage() {
       toast.success("Login successful!", {
         description: "Welcome back! You have been logged in successfully.",
       });
-      router.push("/dashboard/blogs");
+      router.push("/blogs");
     } catch (err: unknown) {
       let msg: string | null = error;
       if (

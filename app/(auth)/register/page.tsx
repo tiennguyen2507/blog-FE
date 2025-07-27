@@ -119,7 +119,7 @@ export default function RegisterPage() {
       toast.success("Account created!", {
         description: "Your account has been created successfully.",
       });
-      router.push("/dashboard/blogs");
+      router.push("/blogs");
     } catch (err: unknown) {
       let msg: string | null = error;
       if (
