@@ -12,7 +12,7 @@ export default function DashboardLayout({
     <div className="relative flex h-screen overflow-hidden">
       <div className="flex-1 overflow-auto">
         <Topbar />
-        <main className="p-2">{children}</main>
+        <main className="p-4">{children}</main>
         <Footer />
       </div>
     </div>

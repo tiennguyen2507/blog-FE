@@ -1,4 +1,5 @@
 import React, { useRef, useState } from "react";
+import Image from "next/image";
 
 interface UploadFileProps {
   onChange?: (file: File) => void;
@@ -47,9 +48,11 @@ const UploadFile: React.FC<UploadFileProps> = ({ onChange }) => {
         onDragOver={handleDragOver}
       >
         {preview ? (
-          <img
+          <Image
             src={preview}
             alt="Preview"
+            width={200}
+            height={200}
             className="max-w-full object-contain rounded-3xl mb-2"
           />
         ) : (

@@ -6,13 +6,14 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: "*",
       allow: "/",
       disallow: [
-        "/dashboard/settings/",
-        "/dashboard/errors/",
+        "/dashboard/",
         "/api/",
-        "/_next/",
         "/admin/",
+        "/private/",
+        "/*.json$",
+        "/*.xml$",
       ],
     },
-    sitemap: "https://blog-fe-nld.vercel.app/sitemap.xml",
+    sitemap: "https://yourdomain.com/sitemap.xml", // Replace with your actual domain
   };
 }

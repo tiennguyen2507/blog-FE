@@ -19,10 +19,12 @@ import {
 import { Button } from "@/components/ui/button";
 import React, { useState } from "react";
 import httpRequest from "@/lib/httpRequest";
-import QuillViewer from "@/components/ui/QuillViewer";
 import dynamic from "next/dynamic";
-import { Avatar } from "@/components/ui/avatar";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import UploadFile from "@/components/ui/UploadFile";
+import Link from "next/link";
+import Image from "next/image";
+import ClientHtmlViewer from "@/components/ui/ClientHtmlViewer";
 
 const MyEditor = dynamic(() => import("@/components/ui/MyEditor"), {
   ssr: false,
@@ -84,7 +86,7 @@ export default function BlogsPage() {
   };
 
   return (
-    <div className="space-y-4 p-2">
+    <div className="space-y-4">
       <div className="text-center mb-4">
         <h1 className="text-2xl md:text-3xl font-bold mb-1">Blog List pages</h1>
         <p className="text-muted-foreground text-sm md:text-base">
@@ -172,97 +174,112 @@ export default function BlogsPage() {
                 key={post._id}
                 className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden border border-gray-100"
               >
-                {/* Thumbnail */}
-                {post.thumbnail ? (
-                  <div className="relative md:h-48 h-32 overflow-hidden">
-                    <img
-                      src={post.thumbnail}
-                      alt={post.title}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                ) : (
-                  <div className="relative h-48 bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-                    <div className="text-center">
-                      <div className="w-10 h-10 bg-blue-200 rounded-full flex items-center justify-center mx-auto mb-2">
-                        <User className="w-5 h-5 text-gray-400" />
+                {/* Clickable area for post details */}
+                <Link href={`/blogs/${post._id}`} className="block">
+                  <div className="cursor-pointer">
+                    {/* Thumbnail */}
+                    {post.thumbnail ? (
+                      <div className="relative md:h-48 h-32 overflow-hidden">
+                        <Image
+                          src={post.thumbnail}
+                          alt={post.title}
+                          width={400}
+                          height={200}
+                          className="w-full h-full object-cover"
+                        />
                       </div>
-                      <span className="text-gray-400 text-sm font-medium">
-                        No Image
-                      </span>
-                    </div>
-                  </div>
-                )}
-
-                {/* Content */}
-                <div className="p-4">
-                  {/* Date */}
-                  <div className="text-sm text-gray-500 mb-3">
-                    {new Date(post.createdAt).toLocaleDateString("en-US", {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    })}
-                  </div>
-                  <h3 className="text-lg font-bold text-gray-900 mb-1 line-clamp-2 leading-tight min-h-[45px]">
-                    {post.title}
-                  </h3>
-
-                  {/* Description */}
-                  <div className="text-sm text-gray-600 mb-1 line-clamp-3 leading-relaxed min-h-[77px]">
-                    <QuillViewer
-                      html={post.description}
-                      className="text-sm text-gray-600 line-clamp-3"
-                    />
-                  </div>
-                  <div className="flex justify-between">
-                    <div className="flex items-center gap-3">
-                      {post.createdBy && (
-                        <>
-                          <Avatar className="w-8 h-8">
-                            {post.createdBy.avatar ? (
-                              <img
-                                src={post.createdBy.avatar}
-                                alt={`${post.createdBy.firstName} ${post.createdBy.lastName}`}
-                                className="w-8 h-8 rounded-full object-cover"
-                              />
-                            ) : (
-                              <User className="w-5 h-5 text-gray-400" />
-                            )}
-                          </Avatar>
-                          <div>
-                            <div className="text-sm font-medium text-gray-900">
-                              {`${post.createdBy.firstName || ""} ${
-                                post.createdBy.lastName || ""
-                              }`.trim() || "Anonymous"}
-                            </div>
-                            <div className="text-xs text-gray-500">
-                              {post.status ? "Active" : "Inactive"}
-                            </div>
+                    ) : (
+                      <div className="relative h-48 bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+                        <div className="text-center">
+                          <div className="w-10 h-10 bg-blue-200 rounded-full flex items-center justify-center mx-auto mb-2">
+                            <User className="w-5 h-5 text-gray-400" />
                           </div>
-                        </>
-                      )}
-                    </div>
+                          <span className="text-gray-400 text-sm font-medium">
+                            No Image
+                          </span>
+                        </div>
+                      </div>
+                    )}
 
-                    <div className="flex gap-2">
-                      <button
-                        className="w-8 h-8 flex-1 bg-red-50 text-red-600 border border-red-200 px-2 py-2 rounded-[50%] text-sm font-medium hover:bg-red-100 transition-colors flex items-center justify-center gap-2"
-                        onClick={() => handleDelete(post._id)}
-                      >
-                        <Trash size={16} />
-                      </button>
-                      <button
-                        className="w-8 h-8 flex-1 bg-blue-50 text-blue-600 border border-blue-200 px-2 py-2 rounded-[50%] text-sm font-medium hover:bg-blue-100 transition-colors flex items-center justify-center gap-2"
-                        onClick={() => {
-                          setEditingPost(post);
-                          setDialogOpen(true);
-                        }}
-                      >
-                        <Pencil size={16} />
-                      </button>
+                    {/* Content */}
+                    <div className="p-4">
+                      {/* Date */}
+                      <div className="text-sm text-gray-500 mb-3">
+                        {new Date(post.createdAt).toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        })}
+                      </div>
+                      <h3 className="text-lg font-bold text-gray-900 mb-1 line-clamp-2 leading-tight min-h-[45px]">
+                        {post.title}
+                      </h3>
+
+                      {/* Description */}
+                      <div className="text-sm text-gray-600 mb-1 line-clamp-3 leading-relaxed min-h-[77px]">
+                        <ClientHtmlViewer
+                          html={post.description}
+                          className="text-sm text-gray-600 line-clamp-3"
+                        />
+                      </div>
+                      <div className="flex justify-between">
+                        <div className="flex items-center gap-3">
+                          {post.createdBy && (
+                            <>
+                              <Avatar className="w-8 h-8">
+                                {post.createdBy.avatar ? (
+                                  <AvatarImage
+                                    src={post.createdBy.avatar}
+                                    alt={`${post.createdBy.firstName} ${post.createdBy.lastName}`}
+                                  />
+                                ) : (
+                                  <AvatarFallback>
+                                    <User className="w-5 h-5 text-gray-400" />
+                                  </AvatarFallback>
+                                )}
+                              </Avatar>
+                              <div>
+                                <div className="text-sm font-medium text-gray-900">
+                                  {`${post.createdBy.firstName || ""} ${
+                                    post.createdBy.lastName || ""
+                                  }`.trim() || "Anonymous"}
+                                </div>
+                                <div className="text-xs text-gray-500">
+                                  {post.status ? "Active" : "Inactive"}
+                                </div>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                        <div className="p-4 pt-0">
+                          <div className="flex gap-2 justify-end">
+                            <button
+                              className="w-8 h-8 flex-1 bg-red-50 text-red-600 border border-red-200 px-2 py-2 rounded-[50%] text-sm font-medium hover:bg-red-100 transition-colors flex items-center justify-center gap-2"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                handleDelete(post._id);
+                              }}
+                            >
+                              <Trash size={16} />
+                            </button>
+                            <button
+                              className="w-8 h-8 flex-1 bg-blue-50 text-blue-600 border border-blue-200 px-2 py-2 rounded-[50%] text-sm font-medium hover:bg-blue-100 transition-colors flex items-center justify-center gap-2"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setEditingPost(post);
+                                setDialogOpen(true);
+                              }}
+                            >
+                              <Pencil size={16} />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
+                </Link>
               </article>
             ))}
           </div>
