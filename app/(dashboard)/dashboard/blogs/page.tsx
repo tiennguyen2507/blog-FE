@@ -22,6 +22,7 @@ import httpRequest from "@/lib/httpRequest";
 import QuillViewer from "@/components/ui/QuillViewer";
 import dynamic from "next/dynamic";
 import { Avatar } from "@/components/ui/avatar";
+import UploadFile from "@/components/ui/UploadFile";
 
 const MyEditor = dynamic(() => import("@/components/ui/MyEditor"), {
   ssr: false,
@@ -31,6 +32,7 @@ interface Post {
   _id: string;
   title: string;
   description: string;
+  thumbnail?: string;
   status: boolean;
   createdAt: string;
   updatedAt: string;
@@ -109,18 +111,26 @@ export default function AuthPage() {
             </Button>
           </div>
         </DialogTrigger>
-        <DialogContent className="rounded-2xl p-0 max-w-2xl w-full shadow-2xl animate-fadeIn">
-          <div className="p-6">
+        <DialogContent
+          className="rounded-2xl p-0 max-w-2xl w-full max-h-[90vh] shadow-2xl animate-fadeIn flex flex-col"
+          style={{ maxHeight: "90vh" }}
+        >
+          {/* Fixed Header */}
+          <div className="p-6 pb-4 border-b border-gray-200">
             <DialogHeader>
               <DialogTitle className="text-2xl font-bold mb-1">
                 {editingPost ? "Cập nhật bài viết" : "Tạo bài viết mới"}
               </DialogTitle>
-              <p className="text-muted-foreground text-sm mb-4">
+              <p className="text-muted-foreground text-sm">
                 {editingPost
                   ? "Chỉnh sửa nội dung và tiêu đề bài viết."
                   : "Điền thông tin để tạo bài viết mới."}
               </p>
             </DialogHeader>
+          </div>
+
+          {/* Scrollable Content */}
+          <div className="flex-1 overflow-y-auto p-6 pt-4">
             <PostForm
               post={editingPost || undefined}
               onSuccess={() => {
@@ -156,85 +166,106 @@ export default function AuthPage() {
           </div>
         )}
         {postList && postList.data && postList.data.length > 0 ? (
-          <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {postList.data.map((post) => (
-              <li
+              <article
                 key={post._id}
-                className="border rounded-xl p-3 sm:p-4 bg-white shadow-sm flex flex-col relative group transition hover:shadow-md"
+                className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden border border-gray-100"
               >
-                <div className="font-bold text-base sm:text-lg mb-1 line-clamp-1 text-gray-900">
-                  {post.title}
-                </div>
-                <div className="flex items-center gap-2 mb-2">
-                  {post.createdBy && (
-                    <Avatar>
-                      {post.createdBy.avatar ? (
-                        <img
-                          src={post.createdBy.avatar}
-                          alt={
-                            post.createdBy.firstName +
-                            " " +
-                            post.createdBy.lastName
-                          }
-                          className="w-7 h-7 rounded-full object-cover"
-                        />
-                      ) : (
-                        <User className="w-7 h-7 text-gray-400" />
-                      )}
-                    </Avatar>
-                  )}
-                  <span className="text-sm text-gray-700 font-medium">
-                    {post.createdBy
-                      ? `${post.createdBy.firstName || ""} ${
-                          post.createdBy.lastName || ""
-                        }`.trim()
-                      : ""}
-                  </span>
-                </div>
-                <QuillViewer
-                  html={post.description}
-                  className="text-sm text-muted-foreground mb-2 line-clamp-3 max-h-[60px] overflow-hidden"
-                />
-                <div className="flex flex-row justify-between">
-                  <div className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-1 sm:gap-2 text-xs text-gray-500 mt-auto">
-                    <span>
-                      Status:{" "}
-                      <span
-                        className={
-                          post.status ? "text-green-600" : "text-red-600"
-                        }
-                      >
-                        {post.status ? "Active" : "Inactive"}
+                {/* Thumbnail */}
+                {post.thumbnail ? (
+                  <div className="relative h-48 overflow-hidden">
+                    <img
+                      src={post.thumbnail}
+                      alt={post.title}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                ) : (
+                  <div className="relative h-48 bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+                    <div className="text-center">
+                      <div className="w-10 h-10 bg-blue-200 rounded-full flex items-center justify-center mx-auto mb-2">
+                        <User className="w-5 h-5 text-gray-400" />
+                      </div>
+                      <span className="text-gray-400 text-sm font-medium">
+                        No Image
                       </span>
-                    </span>
-                    <span>
-                      Created:{" "}
-                      {new Date(post.createdAt).toLocaleString("vi-VN")}
-                    </span>
+                    </div>
                   </div>
-                  <div className="flex flex-row gap-2">
-                    <button
-                      className="p-2 rounded-full bg-white shadow hover:bg-red-100 active:bg-red-200"
-                      title="Xoá bài viết"
-                      onClick={() => handleDelete(post._id)}
-                    >
-                      <Trash size={20} />
-                    </button>
-                    <button
-                      className="p-2 rounded-full bg-white shadow hover:bg-blue-100 active:bg-blue-200"
-                      title="Sửa bài viết"
-                      onClick={() => {
-                        setEditingPost(post);
-                        setDialogOpen(true);
-                      }}
-                    >
-                      <Pencil size={20} />
-                    </button>
+                )}
+
+                {/* Content */}
+                <div className="p-4">
+                  {/* Date */}
+                  <div className="text-sm text-gray-500 mb-3">
+                    {new Date(post.createdAt).toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-900 mb-3 line-clamp-2 leading-tight min-h-[45px]">
+                    {post.title}
+                  </h3>
+
+                  {/* Description */}
+                  <div className="text-sm text-gray-600 mb-4 line-clamp-3 leading-relaxed min-h-[77px]">
+                    <QuillViewer
+                      html={post.description}
+                      className="text-sm text-gray-600 line-clamp-3"
+                    />
+                  </div>
+                  <div className="flex justify-between">
+                    <div className="flex items-center gap-3">
+                      {post.createdBy && (
+                        <>
+                          <Avatar className="w-8 h-8">
+                            {post.createdBy.avatar ? (
+                              <img
+                                src={post.createdBy.avatar}
+                                alt={`${post.createdBy.firstName} ${post.createdBy.lastName}`}
+                                className="w-8 h-8 rounded-full object-cover"
+                              />
+                            ) : (
+                              <User className="w-5 h-5 text-gray-400" />
+                            )}
+                          </Avatar>
+                          <div>
+                            <div className="text-sm font-medium text-gray-900">
+                              {`${post.createdBy.firstName || ""} ${
+                                post.createdBy.lastName || ""
+                              }`.trim() || "Anonymous"}
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              {post.status ? "Active" : "Inactive"}
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </div>
+
+                    <div className="flex gap-2">
+                      <button
+                        className="w-8 h-8 flex-1 bg-red-50 text-red-600 border border-red-200 px-2 py-2 rounded-[50%] text-sm font-medium hover:bg-red-100 transition-colors flex items-center justify-center gap-2"
+                        onClick={() => handleDelete(post._id)}
+                      >
+                        <Trash size={16} />
+                      </button>
+                      <button
+                        className="w-8 h-8 flex-1 bg-blue-50 text-blue-600 border border-blue-200 px-2 py-2 rounded-[50%] text-sm font-medium hover:bg-blue-100 transition-colors flex items-center justify-center gap-2"
+                        onClick={() => {
+                          setEditingPost(post);
+                          setDialogOpen(true);
+                        }}
+                      >
+                        <Pencil size={16} />
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </li>
+              </article>
             ))}
-          </ul>
+          </div>
         ) : (
           !loading && (
             <div className="text-center text-muted-foreground py-8">
@@ -258,6 +289,12 @@ function PostForm({
 }) {
   const [title, setTitle] = useState(post?.title || "");
   const [description, setDescription] = useState(post?.description || "");
+  const [thumbnailFile, setThumbnailFile] = useState<File | undefined>(
+    undefined
+  );
+  const [thumbnailUrl, setThumbnailUrl] = useState<string | undefined>(
+    post?.thumbnail
+  );
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState<boolean | null>(null);
@@ -268,16 +305,34 @@ function PostForm({
     setMessage(null);
     setIsSuccess(null);
     try {
+      let thumbnail = thumbnailUrl;
+      if (thumbnailFile) {
+        const formData = new FormData();
+        formData.append("file", thumbnailFile);
+        formData.append("folder", "thumbnails");
+        const res = await httpRequest.post("/image/upload", formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+        thumbnail = res.data?.secure_url || res.data?.url;
+        setThumbnailUrl(thumbnail);
+      }
+
       if (post) {
-        await httpRequest.patch(`/posts/${post._id}`, { title, description });
+        await httpRequest.patch(`/posts/${post._id}`, {
+          title,
+          description,
+          thumbnail,
+        });
         setMessage("Cập nhật bài viết thành công!");
         setIsSuccess(true);
       } else {
-        await httpRequest.post("/posts", { title, description });
+        await httpRequest.post("/posts", { title, description, thumbnail });
         setMessage("Tạo bài viết thành công!");
         setIsSuccess(true);
         setTitle("");
         setDescription("");
+        setThumbnailUrl(undefined);
+        setThumbnailFile(undefined);
       }
       if (onSuccess) onSuccess();
     } catch (err: unknown) {
@@ -293,77 +348,91 @@ function PostForm({
   };
 
   return (
-    <form className="space-y-5" onSubmit={handleSubmit}>
-      <div>
-        <label className="block mb-1 font-semibold text-base">Tiêu đề</label>
-        <div className="relative">
-          <input
-            className="border rounded-lg w-full py-2 px-3 text-base focus:outline-none focus:ring-2 focus:ring-primary/60 focus:border-primary transition disabled:bg-gray-100 placeholder:text-gray-400"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
+    <div className="relative pb-20">
+      <div className="space-y-5">
+        <div>
+          <label className="block mb-1 font-semibold text-base">Tiêu đề</label>
+          <div className="relative">
+            <input
+              className="border rounded-lg w-full py-2 px-3 text-base focus:outline-none focus:ring-2 focus:ring-primary/60 focus:border-primary transition disabled:bg-gray-100 placeholder:text-gray-400"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              disabled={loading}
+              placeholder="Nhập tiêu đề bài viết..."
+              maxLength={120}
+            />
+          </div>
+        </div>
+        <div>
+          <label className="block mb-1 font-semibold text-base">
+            Thumbnail
+          </label>
+          <UploadFile onChange={setThumbnailFile} />
+        </div>
+        <div>
+          <label className="block mb-1 font-semibold text-base">Mô tả</label>
+          <div className="rounded-lg border focus-within:ring-2 focus-within:ring-primary/60 focus-within:border-primary transition">
+            <MyEditor value={description} onChange={setDescription} />
+          </div>
+        </div>
+
+        {message && (
+          <div
+            className={`flex items-center gap-2 justify-center text-sm mt-2 font-medium ${
+              isSuccess === true
+                ? "text-green-600"
+                : isSuccess === false
+                ? "text-red-600"
+                : "text-gray-700"
+            }`}
+          >
+            {isSuccess === true ? (
+              <CheckCircle2 className="w-5 h-5" />
+            ) : isSuccess === false ? (
+              <XCircle className="w-5 h-5" />
+            ) : null}
+            {message}
+          </div>
+        )}
+      </div>
+
+      {/* Fixed Footer */}
+      <div className="absolute bottom-0 left-0 right-0 p-6 pt-4 border-t border-gray-200 bg-white">
+        <div className="flex flex-col sm:flex-row gap-2 justify-end">
+          <button
+            type="button"
+            className="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-gray-300 transition font-medium"
+            onClick={onCancel}
             disabled={loading}
-            placeholder="Nhập tiêu đề bài viết..."
-            maxLength={120}
-          />
-        </div>
-      </div>
-      <div>
-        <label className="block mb-1 font-semibold text-base">Mô tả</label>
-        <div className="rounded-lg border focus-within:ring-2 focus-within:ring-primary/60 focus-within:border-primary transition">
-          <MyEditor value={description} onChange={setDescription} />
-        </div>
-      </div>
-      <div className="flex flex-col sm:flex-row gap-2 justify-end mt-4">
-        <button
-          type="button"
-          className="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-gray-300 transition font-medium"
-          onClick={onCancel}
-          disabled={loading}
-        >
-          <XCircle className="w-5 h-5" />
-          Huỷ
-        </button>
-        <button
-          type="submit"
-          className="bg-primary text-white px-4 py-2 rounded-lg flex items-center gap-2 disabled:opacity-50 font-semibold shadow hover:bg-primary/90 transition"
-          disabled={loading || !title.trim() || !description.trim()}
-        >
-          {loading ? (
-            <Loader className="animate-spin w-5 h-5" />
-          ) : isSuccess ? (
-            <CheckCircle2 className="w-5 h-5" />
-          ) : post ? (
-            <Pencil className="w-5 h-5" />
-          ) : (
-            <Plus className="w-5 h-5" />
-          )}
-          {loading
-            ? post
-              ? "Đang cập nhật..."
-              : "Đang tạo..."
-            : post
-            ? "Cập nhật bài viết"
-            : "Tạo bài viết"}
-        </button>
-      </div>
-      {message && (
-        <div
-          className={`flex items-center gap-2 justify-center text-sm mt-2 font-medium ${
-            isSuccess === true
-              ? "text-green-600"
-              : isSuccess === false
-              ? "text-red-600"
-              : "text-gray-700"
-          }`}
-        >
-          {isSuccess === true ? (
-            <CheckCircle2 className="w-5 h-5" />
-          ) : isSuccess === false ? (
+          >
             <XCircle className="w-5 h-5" />
-          ) : null}
-          {message}
+            Huỷ
+          </button>
+          <button
+            type="button"
+            className="bg-primary text-white px-4 py-2 rounded-lg flex items-center gap-2 disabled:opacity-50 font-semibold shadow hover:bg-primary/90 transition"
+            disabled={loading || !title.trim() || !description.trim()}
+            onClick={handleSubmit}
+          >
+            {loading ? (
+              <Loader className="animate-spin w-5 h-5" />
+            ) : isSuccess ? (
+              <CheckCircle2 className="w-5 h-5" />
+            ) : post ? (
+              <Pencil className="w-5 h-5" />
+            ) : (
+              <Plus className="w-5 h-5" />
+            )}
+            {loading
+              ? post
+                ? "Đang cập nhật..."
+                : "Đang tạo..."
+              : post
+              ? "Cập nhật bài viết"
+              : "Tạo bài viết"}
+          </button>
         </div>
-      )}
-    </form>
+      </div>
+    </div>
   );
 }
